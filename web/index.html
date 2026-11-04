@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+  <meta name="theme-color" content="#0c1226">
+  <meta name="description" content="Brickbash : le casse-brique avec bonus, briques d'acier et explosives. Dans le navigateur, sans compte, hors ligne.">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <script src="pwa.js" defer></script>
+  <title>Brickbash</title>
+  <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div id="app">
+    <section id="title" class="screen">
+      <h1 data-i18n="title"></h1>
+      <p class="tagline" data-i18n="tagline"></p>
+      <div class="stack">
+        <button class="btn primary" data-action="continue" id="btn-continue" data-i18n="continue"></button>
+        <button class="btn" data-action="levels" data-i18n="levels"></button>
+        <button class="btn" data-action="help" data-i18n="howTo"></button>
+      </div>
+      <div class="links">
+        <button class="link" data-action="toggleSound" id="opt-sound"></button>
+        <button class="link" data-action="toggleLang" id="opt-lang"></button>
+      </div>
+      <footer class="foot">
+        <a class="all" href="https://games.prunus.dev" data-i18n="allGames"></a>
+        <a class="gh" href="https://github.com/OpenPrunus/brickbash" target="_blank" rel="noopener noreferrer"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg><span data-i18n="github"></span></a>
+        <span class="license" title="MIT License">MIT</span>
+      </footer>
+    </section>
+
+    <section id="levels" class="screen" hidden>
+      <h2 data-i18n="levels"></h2>
+      <div id="level-grid" class="level-grid"></div>
+      <button class="btn small" data-action="title" data-i18n="back"></button>
+    </section>
+
+    <section id="help" class="screen" hidden>
+      <h2 data-i18n="howTo"></h2>
+      <p class="left" data-i18n="help1"></p>
+      <p class="left" data-i18n="help2"></p>
+      <p class="left" data-i18n="help3"></p>
+      <button class="btn small" data-action="title" data-i18n="ok"></button>
+    </section>
+
+    <section id="game" class="screen" hidden>
+      <header id="bar">
+        <b id="lvl-name"></b>
+        <span class="stat"><span data-i18n="score"></span> <b id="st-score">0</b></span>
+        <span class="stat"><span data-i18n="lives"></span> <b id="st-lives">3</b></span>
+      </header>
+      <div id="field"><canvas id="canvas" width="600" height="800" aria-label="Brickbash"></canvas>
+        <div id="briefing" class="overlay" hidden>
+          <h2 id="brief-title"></h2>
+          <p id="brief-hint"></p>
+          <p id="brief-goal"></p>
+          <button class="btn primary" data-action="begin" data-i18n="start"></button>
+        </div>
+        <div id="pausebox" class="overlay" hidden>
+          <h2 data-i18n="paused"></h2>
+          <div class="stack">
+            <button class="btn primary" data-action="pause" data-i18n="resume"></button>
+            <button class="btn" data-action="restart" data-i18n="restart"></button>
+            <button class="btn" data-action="levels" data-i18n="levels"></button>
+          </div>
+        </div>
+        <div id="result" class="overlay" hidden>
+          <h2 id="res-title"></h2>
+          <p id="res-stars" aria-hidden="true"></p>
+          <p id="res-detail"></p>
+          <div class="stack">
+            <button class="btn primary" id="res-main" data-action="next"></button>
+            <button class="btn" data-action="restart" data-i18n="restart"></button>
+            <button class="btn" data-action="levels" data-i18n="levels"></button>
+          </div>
+        </div>
+      </div>
+      <p id="hint"></p>
+      <div id="controls">
+        <button class="ctl" id="btn-pause" data-action="pause" data-i18n-aria="pause" data-i18n-title="pause">&#10074;&#10074;</button>
+        <button class="ctl" data-action="restart" data-i18n-aria="restart" data-i18n-title="restart">&#8635;</button>
+        <button class="ctl" data-action="toggleSound" id="btn-sound" data-i18n-aria="soundOn">&#9835;</button>
+        <button class="ctl" data-action="levels" data-i18n-aria="menu" data-i18n-title="menu">&#9776;</button>
+      </div>
+    </section>
+  </div>
+  <script type="module" src="js/main.js"></script>
+</body>
+</html>

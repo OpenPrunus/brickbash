@@ -1,0 +1,54 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  unit:
+    name: Engine, levels (an autoplayer clears every level), translations
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+      - run: npm run lint
+      - run: npm run test:unit
+
+  browser:
+    name: Browser (desktop and emulated phone, offline)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+      - name: Drive headless Chrome
+        run: npm run test:browser
+
+  docker:
+    name: Docker image (smoke test)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - run: docker build -t brickbash:ci .
+      - name: Serve and check the page, its assets and the security headers
+        run: |
+          set -eu
+          docker run -d --name brickbash -p 8080:80 brickbash:ci
+          for i in $(seq 1 20); do curl -fs http://localhost:8080/ >/dev/null && break; sleep 1; done
+          code() { curl -s -o /dev/null -w '%{http_code}' "$@"; }
+          test "$(code http://localhost:8080/)" = 200
+          for f in css/style.css js/main.js js/engine.js js/levels.js js/render.js js/audio.js js/i18n.js manifest.webmanifest sw.js pwa.js icons/icon-192.png icons/icon-512.png icons/icon.svg; do test "$(code http://localhost:8080/$f)" = 200; done
+          for f in Dockerfile nginx.conf docker-compose.yml tests/engine.test.js .git/config; do test "$(code http://localhost:8080/$f)" = 404; done
+          curl -sI http://localhost:8080/manifest.webmanifest | grep -qi "application/manifest+json"
+          curl -sI http://localhost:8080/ | grep -qi "content-security-policy"
+          curl -sI http://localhost:8080/ | grep -qi "x-content-type-options: nosniff"
+      - name: Container logs
+        if: failure()
+        run: docker logs brickbash

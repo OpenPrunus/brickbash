@@ -1,0 +1,16 @@
+{
+  "name": "brickbash",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Brickbash: a breakout game with bonuses, steel and explosive bricks (browser game, static site)",
+  "license": "MIT",
+  "engines": { "node": ">=22" },
+  "scripts": {
+    "test": "node --test tests/engine.test.js tests/levels.test.js tests/i18n.test.js tests/pwa.test.js && npm run test:browser",
+    "test:unit": "node --test tests/engine.test.js tests/levels.test.js tests/i18n.test.js tests/pwa.test.js",
+    "test:browser": "node --test --test-timeout=200000 tests/browser.test.js",
+    "lint": "for f in web/js/*.js tests/*.js; do node --check $f || exit 1; done",
+    "serve": "python3 -m http.server 8100 --directory web"
+  }
+}
