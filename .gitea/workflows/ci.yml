@@ -1,12 +1,20 @@
 name: CI
 
+# CI sur le Gitea interne (git.prunus.dev, runner LXC 111). GitHub n'est qu'une sauvegarde : pas de CI là-bas.
 on:
   push:
     branches: [main]
+    # Jamais sur une étiquette (Gitea lancerait sinon la CI de chaque étiquette poussée)
+    tags-ignore: ['**']
   pull_request:
 
 permissions:
   contents: read
+
+concurrency:
+  # Le groupe est partagé entre dépôts sur Gitea : le nom du dépôt y figure
+  group: ci-${{ github.repository }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   unit:
@@ -18,7 +26,12 @@ jobs:
         with:
           node-version: 22
       - run: npm run lint
-      - run: npm run test:unit
+      - name: Tests unitaires et couverture
+        run: npm run test:coverage 2>&1 | tee coverage.txt
+      - name: Résumé de la couverture
+        if: always()
+        run: |
+          { echo '### Couverture du code'; echo '```'; cat coverage.txt 2>/dev/null; echo '```'; } >> "${GITHUB_STEP_SUMMARY:-/dev/null}"
 
   browser:
     name: Browser (desktop and emulated phone, offline)
